@@ -4,6 +4,9 @@ import requests
 import os
 import threading
 import time
+import subprocess
+import platform
+import json
 
 class DownloadManager:
     def __init__(self, master):
@@ -12,34 +15,52 @@ class DownloadManager:
         self.selected_options = []
         self.save_path = ""
         self.downloaded_files = []
-        self.urls = {
-            "Google Chrome": ("https://dl.google.com/chrome/install/375.126/chrome_installer.exe", "chrome_installer.exe"),
-            "Mozilla Firefox": ("https://download.mozilla.org/?product=firefox-stub&os=win&lang=ru", "firefox_installer.exe"),
-            "Yandex": ("https://browser.yandex.ru/download/?noredirect=1&banerid=1110000", "yandex_installer.exe"),
-            "Opera": ("https://download1.operacdn.com/pub/opera/desktop/99.0.4788.31/win/Opera_99.0.4788.31_Setup.exe", "opera_installer.exe"),
-            "Discord": ("https://discord.com/api/download?platform=win", "discord_installer.exe"),
-            "Skype": ("https://go.skype.com/windows.desktop.download", "skype_installer.exe"),
-            "Telegram Desktop": ("https://updates.tdesktop.com/tsetup/tsetup.4.8.3.exe", "telegram_installer.exe"),
-            "Zoom": ("https://zoom.us/client/latest/ZoomInstaller.exe", "zoom_installer.exe"),
-            "WhatsApp Desktop": ("https://get.microsoft.com/installer/download/9NKSQGP7F2NH?cid=website_cta_psi", "whatsapp_installer.exe"),
-            "Steam": ("https://cdn.cloudflare.steamstatic.com/client/installer/SteamSetup.exe", "steam_installer.exe"),
-            "Epic Games Launcher": ("https://launcher-public-service-prod06.ol.epicgames.com/launcher/api/installer/download/EpicGamesLauncherInstaller.msi", "epic_games_installer.msi"),
-            "EA Play": ("https://origin-a.akamaihd.net/Origin-Client-Download/origin/live/OriginSetup.exe", "ea_play_installer.exe"),
-            "Ubisoft Connect": ("https://ubistatic3-a.akamaihd.net/orbit/launcher_installer/UplayInstaller.exe", "ubisoft_connect_installer.exe"),
-            "Battle.net": ("https://www.battle.net/download/getInstallerForGame?os=win&version=Live&gameProgram=BATTLENET_APP", "battlenet_installer.exe"),
-            "Visual Studio Code": ("https://update.code.visualstudio.com/latest/win32-x64-user/stable", "vscode_installer.exe"),
-            "JetBrains IntelliJ IDEA": ("https://download.jetbrains.com/idea/ideaIU-2023.1.exe", "intellij_idea_installer.exe"),
-            "PyCharm": ("https://download.jetbrains.com/python/pycharm-professional-2023.1.exe", "pycharm_installer.exe"),
-            "Atom": ("https://github.com/atom/atom/releases/download/v1.58.0/AtomSetup-x64.exe", "atom_installer.exe"),
-            "Sublime Text": ("https://download.sublimetext.com/Sublime%20Text%20Build%203211%20x64%20Setup.exe", "sublime_text_installer.exe"),
-            "OBS Studio": ("https://cdn-fastly.obsproject.com/downloads/OBS-Studio-27.1.3-Full-Installer-x64.exe", "obs_studio_installer.exe"),
-            "7-Zip": ("https://www.7-zip.org/a/7z2201-x64.exe", "7zip_installer.exe"),
-            "Logitech G Hub": ("https://download01.logi.com/web/ftp/pub/techsupport/gaming/lghub_installer.exe", "logitech_g_hub_installer.exe"),
-            "Razer Synapse": ("https://rzr.to/synapse-3-pc-download", "razer_synapse_installer.exe"),
-            "MSI Dragon Center": ("https://download.msi.com/uti_exe/common/Dragon-Center.zip", "msi_dragon_center_installer.zip"),
-            "Corsair iCUE": ("https://downloads.corsair.com/Files/CUE/iCUESetup_4.33.138_release.msi", "corsair_icue_installer.msi"),
-            "SteelSeries Engine": ("https://engine.steelseriescdn.com/SteelSeriesGG44.0.0Setup.exe", "steelseries_engine_installer.exe")
-        }
+        self.system = platform.system()  # Windows, Darwin (macOS), Linux
+        self.config_error = None
+        self.config = self.load_config()
+        self.urls = self.build_urls_for_platform()
+
+    def load_config(self):
+        """Загрузка конфигурации из JSON файла"""
+        config_path = os.path.join(os.path.dirname(__file__), "config.json")
+        try:
+            with open(config_path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except FileNotFoundError:
+            print(f"ОШИБКА: Файл конфигурации config.json не найден!\nОжидался путь: {config_path}")
+            self.config_error = f"Файл конфигурации config.json не найден!\nОжидался путь: {config_path}"
+            return {"downloads": {}, "categories": {}}
+        except json.JSONDecodeError as e:
+            print(f"ОШИБКА: Ошибка чтения config.json: {e}")
+            self.config_error = f"Ошибка чтения config.json: {e}"
+            return {"downloads": {}, "categories": {}}
+
+    def build_urls_for_platform(self):
+        """Построение словаря URL для текущей платформы"""
+        urls = {}
+        downloads = self.config.get("downloads", {})
+        
+        for name, platforms in downloads.items():
+            platform_key = "Windows" if self.system == "Windows" else "Darwin" if self.system == "Darwin" else None
+            if platform_key and platform_key in platforms:
+                platform_info = platforms[platform_key]
+                if "url" in platform_info and "filename" in platform_info:
+                    urls[name] = (platform_info["url"], platform_info["filename"])
+        
+        return urls
+
+    def resolve_redirect(self, url):
+        """Разрешение редиректов для получения финального URL"""
+        try:
+            response = requests.head(url, allow_redirects=True, timeout=10)
+            return response.url
+        except Exception:
+            # Если HEAD не работает, пробуем GET
+            try:
+                response = requests.get(url, stream=True, timeout=10, allow_redirects=True)
+                return response.url
+            except Exception:
+                return url  # Возвращаем оригинальный URL если не удалось разрешить
 
     def start_download(self):
         self.selected_options = [var.get() for var in all_vars if var.get()]
@@ -68,13 +89,39 @@ class DownloadManager:
         if self.current_index >= len(self.selected_options):
             messagebox.showinfo("Загрузка завершена",
                                 f"Все файлы были успешно загружены:\n" + "\n".join(self.downloaded_files))
-            os.startfile(self.save_path)
+            # Кроссплатформенное открытие папки
+            system = platform.system()
+            if system == 'Windows':
+                os.startfile(self.save_path)
+            elif system == 'Darwin':  # macOS
+                subprocess.run(['open', self.save_path])
+            else:  # Linux и другие
+                subprocess.run(['xdg-open', self.save_path])
             return
 
         option = self.selected_options[self.current_index]
         if option in self.urls:
             url, filename = self.urls[option]
-            threading.Thread(target=self.download_browser, args=(url, filename, option)).start()
+            # Разрешаем редиректы для получения актуального URL
+            final_url = self.resolve_redirect(url)
+            threading.Thread(target=self.download_browser, args=(final_url, filename, option)).start()
+        else:
+            # Если программа недоступна для данной платформы
+            self.master.after(0, lambda: messagebox.showwarning(
+                "Предупреждение", 
+                f"{option} недоступен для операционной системы {self.system}"))
+            self.current_index += 1
+            self.master.after(0, self.download_next_file)
+
+    def update_progress(self, downloaded_size, total_size, filename):
+        """Безопасное обновление прогресс-бара из главного потока"""
+        if total_size > 0:
+            progress = (downloaded_size / total_size) * 100
+            progress_var.set(progress)
+        else:
+            progress_var.set(0)
+        current_status_var.set(
+            f"Загружается: {filename} ({self.current_index + 1}/{len(self.selected_options)})")
 
     def download_browser(self, url, filename, option):
         file_path = os.path.join(self.save_path, filename)
@@ -90,21 +137,22 @@ class DownloadManager:
                         if chunk:
                             f.write(chunk)
                             downloaded_size += len(chunk)
-                            progress_var.set(downloaded_size / total_size * 100)
-                            current_status_var.set(
-                                f"Загружается: {filename} ({self.current_index + 1}/{len(self.selected_options)})")
-                            self.master.update_idletasks()
+                            # Безопасное обновление GUI из главного потока
+                            self.master.after(0, self.update_progress, downloaded_size, total_size, filename)
 
                             elapsed_time = time.time() - start_time
-                            if elapsed_time > 60 and downloaded_size < total_size * 0.05:
+                            # Проверка таймаута только если известен размер файла
+                            if total_size > 0 and elapsed_time > 60 and downloaded_size < total_size * 0.05:
                                 raise Exception("Превышено время ожидания для загрузки")
 
                 self.downloaded_files.append(filename)
         except Exception as e:
-            messagebox.showerror("Ошибка", f"Произошла ошибка при загрузке {filename}: {e}")
+            # Безопасный вызов messagebox из главного потока
+            error_msg = f"Произошла ошибка при загрузке {filename}: {e}"
+            self.master.after(0, lambda: messagebox.showerror("Ошибка", error_msg))
 
         self.current_index += 1
-        self.download_next_file()
+        self.master.after(0, self.download_next_file)
 
 
 def add_to_download_list(item):
@@ -128,7 +176,7 @@ def show_info():
     info_label = tk.Label(info_window, text="Создатель: offach\nКонтакт: me@offach.ru\n\nСписок ссылок:")
     info_label.pack(padx=10, pady=10)
 
-    links_text = "\n".join([f"{name}: {url[0]}" for name, url in download_manager.urls.items()])
+    links_text = "\n".join([f"{name}: {url[0]}" for name, url in download_manager.urls.items() if name in download_manager.urls])
     links_label = tk.Label(info_window, text=links_text, justify=tk.LEFT, anchor="w")
     links_label.pack(padx=10, pady=10)
 
@@ -144,11 +192,18 @@ def create_gui():
     root.title("offach's installer")
     root.geometry("550x650")  # Задаем фиксированный размер окна
     root.configure(bg="white")
+    
+    # Создаем download_manager сначала для работы с конфигом
+    download_manager = DownloadManager(root)
+    
+    # Показываем ошибку конфигурации если есть
+    if hasattr(download_manager, 'config_error') and download_manager.config_error:
+        root.after(100, lambda: messagebox.showerror("Ошибка конфигурации", download_manager.config_error))
 
     def on_start():
         messagebox.showinfo("Внимание", "Ответственности создатель не несет, используйте на свой риск.")
 
-    root.after(100, on_start)
+    root.after(200, on_start)
 
     main_frame = tk.Frame(root, bg="white")
     main_frame.pack(fill=tk.BOTH, expand=True)
@@ -189,14 +244,24 @@ def create_gui():
     info_button = tk.Button(scrollable_frame, text="Информация", command=show_info)
     info_button.pack(anchor="ne", padx=10, pady=5)
 
-    categories = {
+    # Загрузка категорий из конфига или дефолтные
+    categories = download_manager.config.get("categories", {
         "Браузеры": ["Google Chrome", "Mozilla Firefox", "Yandex", "Opera"],
         "СоцСети": ["Discord", "Skype", "Telegram Desktop", "Zoom", "WhatsApp Desktop"],
-        "Лаунчеры игр и т.д.": ["Steam", "Epic Games Launcher", "EA Play", "Ubisoft Connect", "Battle.net"],
-        "Софт для разработки": ["Visual Studio Code", "JetBrains IntelliJ IDEA", "PyCharm", "Atom", "Sublime Text"],
+        "Лаунчеры игр и т.д.": ["Steam", "Epic Games Launcher"],
+        "Софт для разработки": ["Visual Studio Code", "JetBrains IntelliJ IDEA", "PyCharm", "Sublime Text"],
         "Полезные утилиты": ["OBS Studio", "7-Zip"],
-        "Приложения для гаджетов": ["Logitech G Hub", "Razer Synapse", "MSI Dragon Center", "Corsair iCUE", "SteelSeries Engine"]
-    }
+        "Приложения для гаджетов": ["Logitech G Hub"]
+    })
+    
+    # Фильтруем программы - показываем только доступные для текущей ОС
+    available_apps = set(download_manager.urls.keys())
+    filtered_categories = {}
+    for category, apps in categories.items():
+        available = [app for app in apps if app in available_apps]
+        if available:  # Показываем категорию только если есть доступные программы
+            filtered_categories[category] = available
+    categories = filtered_categories
 
     all_vars = []
     all_checkbuttons = []
@@ -239,7 +304,12 @@ def create_gui():
     progress_bar = ttk.Progressbar(scrollable_frame, variable=progress_var, maximum=100)
     progress_bar.pack(fill=tk.X, pady=10)
 
-    download_manager = DownloadManager(root)
+    # Показываем информацию о текущей ОС
+    system_info = tk.Label(scrollable_frame, 
+                          text=f"Платформа: {platform.system()} ({platform.platform()})", 
+                          bg="white", fg="gray")
+    system_info.pack(pady=5)
+
     download_button = tk.Button(scrollable_frame, text="Загрузить", command=download_manager.start_download)
     download_button.pack(pady=10)
 

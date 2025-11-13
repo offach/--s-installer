@@ -1,0 +1,192 @@
+{
+  "downloads": {
+    "Google Chrome": {
+      "Windows": {
+        "url": "https://dl.google.com/chrome/install/ChromeStandaloneSetup64.exe",
+        "filename": "chrome_installer.exe"
+      },
+      "Darwin": {
+        "url": "https://dl.google.com/chrome/mac/universal/stable/GGRO/googlechrome.dmg",
+        "filename": "googlechrome.dmg"
+      }
+    },
+    "Mozilla Firefox": {
+      "Windows": {
+        "url": "https://download.mozilla.org/?product=firefox-latest&os=win64&lang=ru",
+        "filename": "firefox_installer.exe"
+      },
+      "Darwin": {
+        "url": "https://download.mozilla.org/?product=firefox-latest&os=osx&lang=ru",
+        "filename": "firefox.dmg"
+      }
+    },
+    "Yandex": {
+      "Windows": {
+        "url": "https://browser.yandex.ru/download/?noredirect=1&banerid=1110000",
+        "filename": "yandex_installer.exe"
+      },
+      "Darwin": {
+        "url": "https://browser.yandex.ru/download/?os=mac",
+        "filename": "yandex.dmg"
+      }
+    },
+    "Opera": {
+      "Windows": {
+        "url": "https://download1.operacdn.com/pub/opera/desktop/latest/win/Opera_latest_Setup.exe",
+        "filename": "opera_installer.exe"
+      },
+      "Darwin": {
+        "url": "https://download1.operacdn.com/pub/opera/desktop/latest/mac/Opera_latest_Setup.dmg",
+        "filename": "opera.dmg"
+      }
+    },
+    "Discord": {
+      "Windows": {
+        "url": "https://discord.com/api/download?platform=win",
+        "filename": "discord_installer.exe"
+      },
+      "Darwin": {
+        "url": "https://discord.com/api/download?platform=osx",
+        "filename": "discord.dmg"
+      }
+    },
+    "Skype": {
+      "Windows": {
+        "url": "https://go.skype.com/windows.desktop.download",
+        "filename": "skype_installer.exe"
+      },
+      "Darwin": {
+        "url": "https://go.skype.com/mac.download",
+        "filename": "skype.dmg"
+      }
+    },
+    "Telegram Desktop": {
+      "Windows": {
+        "url": "https://updates.tdesktop.com/tsetup/tsetup.exe",
+        "filename": "telegram_installer.exe"
+      },
+      "Darwin": {
+        "url": "https://updates.tdesktop.com/tsetup/tsetup.dmg",
+        "filename": "telegram.dmg"
+      }
+    },
+    "Zoom": {
+      "Windows": {
+        "url": "https://zoom.us/client/latest/ZoomInstaller.exe",
+        "filename": "zoom_installer.exe"
+      },
+      "Darwin": {
+        "url": "https://zoom.us/client/latest/zoomusInstallerFull.pkg",
+        "filename": "zoom.pkg"
+      }
+    },
+    "WhatsApp Desktop": {
+      "Windows": {
+        "url": "https://get.microsoft.com/installer/download/9NKSQGP7F2NH?cid=website_cta_psi",
+        "filename": "whatsapp_installer.exe"
+      },
+      "Darwin": {
+        "url": "https://get.microsoft.com/installer/download/mac/9NKSQGP7F2NH?cid=website_cta_psi",
+        "filename": "whatsapp.dmg"
+      }
+    },
+    "Steam": {
+      "Windows": {
+        "url": "https://cdn.cloudflare.steamstatic.com/client/installer/SteamSetup.exe",
+        "filename": "steam_installer.exe"
+      },
+      "Darwin": {
+        "url": "https://cdn.cloudflare.steamstatic.com/client/installer/steam.dmg",
+        "filename": "steam.dmg"
+      }
+    },
+    "Epic Games Launcher": {
+      "Windows": {
+        "url": "https://launcher-public-service-prod06.ol.epicgames.com/launcher/api/installer/download/EpicGamesLauncherInstaller.msi",
+        "filename": "epic_games_installer.msi"
+      },
+      "Darwin": {
+        "url": "https://launcher-public-service-prod06.ol.epicgames.com/launcher/api/installer/download/EpicGamesLauncher.dmg",
+        "filename": "epic_games_launcher.dmg"
+      }
+    },
+    "Visual Studio Code": {
+      "Windows": {
+        "url": "https://update.code.visualstudio.com/latest/win32-x64-user/stable",
+        "filename": "vscode_installer.exe"
+      },
+      "Darwin": {
+        "url": "https://update.code.visualstudio.com/latest/darwin/stable",
+        "filename": "vscode.zip"
+      }
+    },
+    "JetBrains IntelliJ IDEA": {
+      "Windows": {
+        "url": "https://download.jetbrains.com/idea/ideaIC.exe",
+        "filename": "intellij_idea_installer.exe"
+      },
+      "Darwin": {
+        "url": "https://download.jetbrains.com/idea/ideaIC.dmg",
+        "filename": "intellij_idea.dmg"
+      }
+    },
+    "PyCharm": {
+      "Windows": {
+        "url": "https://download.jetbrains.com/python/pycharm-community.exe",
+        "filename": "pycharm_installer.exe"
+      },
+      "Darwin": {
+        "url": "https://download.jetbrains.com/python/pycharm-community.dmg",
+        "filename": "pycharm.dmg"
+      }
+    },
+    "Sublime Text": {
+      "Windows": {
+        "url": "https://download.sublimetext.com/sublime_text_build_4_x64_setup.exe",
+        "filename": "sublime_text_installer.exe"
+      },
+      "Darwin": {
+        "url": "https://download.sublimetext.com/sublime_text_build_4_mac.zip",
+        "filename": "sublime_text.zip"
+      }
+    },
+    "OBS Studio": {
+      "Windows": {
+        "url": "https://github.com/obsproject/obs-studio/releases/latest/download/OBS-Studio.exe",
+        "filename": "obs_studio_installer.exe"
+      },
+      "Darwin": {
+        "url": "https://github.com/obsproject/obs-studio/releases/latest/download/OBS-Studio.dmg",
+        "filename": "obs_studio.dmg"
+      }
+    },
+    "7-Zip": {
+      "Windows": {
+        "url": "https://www.7-zip.org/a/7z-x64.exe",
+        "filename": "7zip_installer.exe"
+      },
+      "Darwin": {
+        "note": "Not available for macOS, use The Unarchiver instead"
+      }
+    },
+    "Logitech G Hub": {
+      "Windows": {
+        "url": "https://download01.logi.com/web/ftp/pub/techsupport/gaming/lghub_installer.exe",
+        "filename": "logitech_g_hub_installer.exe"
+      },
+      "Darwin": {
+        "url": "https://download01.logi.com/web/ftp/pub/techsupport/gaming/lghub_installer.dmg",
+        "filename": "logitech_g_hub.dmg"
+      }
+    }
+  },
+  "categories": {
+    "Браузеры": ["Google Chrome", "Mozilla Firefox", "Yandex", "Opera"],
+    "СоцСети": ["Discord", "Skype", "Telegram Desktop", "Zoom", "WhatsApp Desktop"],
+    "Лаунчеры игр и т.д.": ["Steam", "Epic Games Launcher"],
+    "Софт для разработки": ["Visual Studio Code", "JetBrains IntelliJ IDEA", "PyCharm", "Sublime Text"],
+    "Полезные утилиты": ["OBS Studio", "7-Zip"],
+    "Приложения для гаджетов": ["Logitech G Hub"]
+  }
+}
+
